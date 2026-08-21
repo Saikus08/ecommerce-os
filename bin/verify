@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+commands = [
+  ["RSpec", "bundle exec rspec"],
+  ["JavaScript build", "npm run build"],
+  ["RuboCop", "bin/rubocop"]
+]
+
+commands.each do |name, command|
+  puts "\n== #{name} =="
+  system(command, exception: true)
+end
