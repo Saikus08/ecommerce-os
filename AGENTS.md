@@ -6,7 +6,7 @@ Gobierna cómo los agentes trabajan en este repositorio. El producto existe para
 
 1. Mejorar decisiones reales del e-commerce.
 2. Reducir incertidumbre con evidencia trazable.
-3. Construir solamente lo necesario para el gate vigente.
+3. Construir slices pequeños orientados al próximo riesgo/decisión.
 4. Mantener Rails idiomático, PostgreSQL como source of truth y arquitectura simple.
 
 Pregunta obligatoria para cualquier feature:
@@ -23,11 +23,10 @@ Pregunta obligatoria para cualquier feature:
 
 ## Alcance actual autorizado
 
-- Crear harness, contexto, OpenSpec y ADRs iniciales.
-- Discutir arquitectura de Gate 1 y Gate 2.
+- Crear y mejorar harness, contexto, OpenSpec y ADRs.
+- Diseñar e implementar slices aprobados para convertir ideas en decisiones GO/REVIEW/NO-GO.
 - No implementar dominio sustancial sin spec/ADR aprobado.
-- No ejecutar `rails new` sin OK humano explícito.
-- No integrar APIs externas, usar datos reales, secretos, cloud o scraping sin decisión explícita.
+- No integrar APIs externas con credenciales/datos reales, usar secretos, cloud o scraping sin decisión explícita.
 
 ## Gates funcionales del negocio
 
@@ -40,7 +39,9 @@ Pregunta obligatoria para cualquier feature:
 7. Market Validation — ¿el desempeño real valida la hipótesis?
 8. Inventory Decision — KILL / REORDER / SCALE.
 
-Implementación actual: solo Gate 1 y Gate 2. Los demás gates pueden existir como conceptos, no como módulos completos.
+Producto inminente: descubrimiento de oportunidad → cuantificación de demanda → cuantificación de competencia → cálculo de unit economics → score/riesgo explicable → GO/REVIEW/NO-GO → sourcing → test pequeño → escalar/hold/kill.
+
+Los gates posteriores pueden especificarse e implementarse por slices aprobados cuando reduzcan incertidumbre real. No construir operación completa ni automatización especulativa antes de validar datos/fuentes.
 
 ## Principios de datos
 
@@ -49,13 +50,22 @@ Implementación actual: solo Gate 1 y Gate 2. Los demás gates pueden existir co
 - Mantener historia mediante snapshots donde el dato cambie con el tiempo.
 - Guardar datos normalizados para consultar/calcular y `raw_payload` para trazabilidad.
 - Distinguir datos `OBSERVED`, `CALCULATED` e `INFERRED`.
-- La IA puede asistir análisis, pero no tomar decisiones ni establecer hechos. No implementar `AiAnalysis` todavía.
+- La IA puede asistir análisis, pero no tomar decisiones ni establecer hechos. No implementar `AiAnalysis` opaco. Scores deben ser fórmulas explicables y testeadas.
+
+## Scoring y decisiones
+
+- No inventar un “AI score” opaco.
+- Demand Score, Competition Score, Economics y Opportunity Score deben tener inputs, pesos y outputs trazables.
+- Unit economics empieza con números financieros reales, no con score.
+- Hard gates prevalecen sobre scores agregados: demanda insuficiente, economics negativos, capital superior a presupuesto o riesgo crítico implican NO-GO.
+- Los umbrales iniciales se calibran con candidatos reales, no se tratan como verdad permanente.
 
 ## Integraciones
 
 - Mercado Libre y Nubimetrics deben investigarse antes de diseñar contratos finales.
 - Separar capacidades públicas, autenticadas, de cuenta propia y no disponibles.
 - No asumir que Nubimetrics tiene API.
+- Validar endpoint/calculador de costos de Mercado Libre antes de automatizar comisiones/logística.
 - No implementar scraping frágil sin discusión.
 - Usar clients/adapters/importers concretos por fuente, no framework genérico de integraciones.
 
@@ -76,7 +86,9 @@ Ante contradicción, parar y registrar la decisión necesaria.
 - Para cambios materiales, crear OpenSpec antes de codear.
 - Mantener cambios chicos y revisables.
 - Usar documentación oficial actualizada vía Context7 para Rails/React/librerías.
+- Usar skills/agentes de `.opencode/` cuando aporten foco: Rails, DB, frontend, testing, seguridad, evaluación y product discovery.
 - No introducir malas prácticas ni atajos técnicos para avanzar más rápido; si la forma correcta requiere más trabajo, explicarlo y pedir decisión.
+- `main` no es rama de trabajo; usar branch por slice/spike según `docs/harness/git-pr-workflow.md`.
 - No leer `.env` ni secretos.
 - No hacer push, deploy, cloud, migraciones destructivas o integración externa sin OK humano explícito.
 
